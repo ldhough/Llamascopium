@@ -579,6 +579,7 @@ class Trainer:
         activation_stream: Iterable[dict[str, Tensor]],
         eval_fn: Callable[[SparseDictionary], None] | None = None,
         wandb_logger: Run | None = None,
+        step_callback: Callable[[int], None] | None = None,
     ) -> bool | None:
         # Reset timer at the start of training
         timer.reset()
@@ -656,6 +657,8 @@ class Trainer:
                     self.cur_tokens += (
                         batch["tokens"].numel() if batch.get("mask") is None else int(item(batch["mask"].sum()))
                     )
+                    if step_callback is not None:
+                        step_callback(self.cur_step)
 
                     self._maybe_save_sae_checkpoint(sae)
                     if self.cur_step >= self.total_training_steps:
