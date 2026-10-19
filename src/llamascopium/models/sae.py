@@ -362,7 +362,7 @@ class SparseAutoEncoder(
         ):  # triton kernel cannot handle empty feature_acts
             from llamascopium.kernels import decode_with_triton_spmm_kernel
 
-            reconstructed = decode_with_triton_spmm_kernel(feature_acts, self.W_D.T.contiguous())
+            reconstructed = decode_with_triton_spmm_kernel(feature_acts, self.W_D)
         else:
             reconstructed = feature_acts @ self.W_D
 

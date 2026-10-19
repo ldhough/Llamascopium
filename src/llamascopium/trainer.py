@@ -88,6 +88,7 @@ class TrainerConfig(BaseConfig):
     betas: Tuple[float, float] = (0.9, 0.999)
     optimizer_class: Literal["adam", "sparseadam"] = "adam"
     optimizer_foreach: bool = True
+    optimizer_fused: bool = False  # Fused Adam takes precedence over foreach.
     lr_scheduler_name: Literal[
         "constant",
         "constantwithwarmup",
@@ -385,7 +386,9 @@ class Trainer:
 
         # only adam optimizer supports foreach parameter
         if self.cfg.optimizer_class == "adam":
-            optimizer_kwargs["foreach"] = self.cfg.optimizer_foreach
+            optimizer_kwargs["foreach"] = self.cfg.optimizer_foreach and not self.cfg.optimizer_fused
+            if self.cfg.optimizer_fused:
+                optimizer_kwargs["fused"] = True
 
         optimizer = optim_cls(**optimizer_kwargs)
 
